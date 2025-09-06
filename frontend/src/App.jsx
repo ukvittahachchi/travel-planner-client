@@ -32,7 +32,7 @@ function App() {
                 } />
         <Route path="/login" element={<Login />} />
         <Route path="/signup" element={<Signup />} />
-        <Route path="/group-planning" element={
+        <Route path="/group-planning/:tripId" element={
                   <ProtectedRoute>
                     <GroupPlanning />
                   </ProtectedRoute>

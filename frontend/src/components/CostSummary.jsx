@@ -4,26 +4,60 @@ const CostSummary = ({ destinations = [], flights = {}, hotels = {}, dailyExpens
   const [totalCost, setTotalCost] = useState(0);
 
   useEffect(() => {
-    // Extract just the price values from flight objects
+    // ✅ Safely calculate total flights cost
     const flightSum = Object.values(flights).reduce((sum, flight) => {
-      return sum + (flight?.price || 0);
+      // If flight is an object with price, use it; otherwise parse the value directly
+      const cost = typeof flight === "object" ? parseFloat(flight?.price) || 0 : parseFloat(flight) || 0;
+      return sum + cost;
     }, 0);
-    
-    // Extract just the price values from hotel objects
+
+    // ✅ Safely calculate total hotels cost
     const hotelSum = Object.values(hotels).reduce((sum, hotel) => {
-      return sum + (hotel?.price || 0);
+      const cost = typeof hotel === "object" ? parseFloat(hotel?.price) || 0 : parseFloat(hotel) || 0;
+      return sum + cost;
     }, 0);
-    
-    const dailySum = (destinations?.length || 0) * dailyExpense;
+
+    // ✅ Calculate daily expenses
+    const dailySum = (destinations?.length || 0) * (parseFloat(dailyExpense) || 100);
+
+    // ✅ Update total cost
     setTotalCost(flightSum + hotelSum + dailySum);
   }, [destinations, flights, hotels, dailyExpense]);
 
+  // ✅ Format cost as currency
+  const formatCurrency = (amount) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(amount);
+
   return (
-    <div className="border p-4 rounded shadow-md mt-4">
+    <div className="border p-4 rounded shadow-md mt-4 bg-white">
       <h3 className="text-xl font-semibold mb-2">Cost Summary</h3>
-      <p>
-        Total Estimated Cost: <span className="font-bold">${totalCost}</span>
-      </p>
+
+      <div className="space-y-1 text-gray-700">
+        <p>Flights: <span className="font-bold">{formatCurrency(
+          Object.values(flights).reduce((sum, flight) => {
+            return sum + (typeof flight === "object" ? parseFloat(flight?.price) || 0 : parseFloat(flight) || 0);
+          }, 0)
+        )}</span></p>
+
+        <p>Hotels: <span className="font-bold">{formatCurrency(
+          Object.values(hotels).reduce((sum, hotel) => {
+            return sum + (typeof hotel === "object" ? parseFloat(hotel?.price) || 0 : parseFloat(hotel) || 0);
+          }, 0)
+        )}</span></p>
+
+        <p>Daily Expenses: <span className="font-bold">{formatCurrency(
+          (destinations?.length || 0) * (parseFloat(dailyExpense) || 100)
+        )}</span></p>
+
+        <hr className="my-2" />
+
+        <p className="text-lg font-semibold">
+          Total Estimated Cost: <span className="text-green-600">{formatCurrency(totalCost)}</span>
+        </p>
+      </div>
     </div>
   );
 };

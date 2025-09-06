@@ -14,12 +14,33 @@ const ItineraryBuilder = () => {
     flights: {},
     hotels: {},
     dailyExpense: 100,
+    members: [], // ✅ NEW: Store group members
   });
+
+  const [memberInput, setMemberInput] = useState("");
+
+  // ✅ Add a new group member
+  const handleAddMember = () => {
+    if (memberInput.trim() !== "") {
+      setTripData({
+        ...tripData,
+        members: [...tripData.members, memberInput.trim()],
+      });
+      setMemberInput("");
+    }
+  };
+
+  // ✅ Remove a member
+  const handleRemoveMember = (index) => {
+    const updatedMembers = [...tripData.members];
+    updatedMembers.splice(index, 1);
+    setTripData({ ...tripData, members: updatedMembers });
+  };
 
   const handleSaveTrip = () => {
     console.log("Saved Trip:", tripData);
 
-    // Save in localStorage for now
+    // Save trip in localStorage
     const existingTrips = JSON.parse(localStorage.getItem("trips")) || [];
     localStorage.setItem("trips", JSON.stringify([...existingTrips, tripData]));
 
@@ -55,13 +76,46 @@ const ItineraryBuilder = () => {
         destinations={tripData.destinations || []}
         flights={tripData.flights || {}}
         hotels={tripData.hotels || {}}
-        setFlights={(newFlights) =>
-          setTripData({ ...tripData, flights: newFlights })
-        }
-        setHotels={(newHotels) =>
-          setTripData({ ...tripData, hotels: newHotels })
-        }
+        setFlights={(newFlights) => setTripData({ ...tripData, flights: newFlights })}
+        setHotels={(newHotels) => setTripData({ ...tripData, hotels: newHotels })}
       />
+
+      {/* ✅ Group Members Input */}
+      <div className="mt-6 border p-4 rounded shadow">
+        <h3 className="text-lg font-semibold mb-2">Group Members</h3>
+        <div className="flex gap-2 mb-3">
+          <input
+            type="text"
+            placeholder="Enter member name or email"
+            value={memberInput}
+            onChange={(e) => setMemberInput(e.target.value)}
+            className="border p-2 rounded w-full"
+          />
+          <button
+            onClick={handleAddMember}
+            className="bg-green-500 text-white px-3 py-2 rounded hover:bg-green-600"
+          >
+            Add
+          </button>
+        </div>
+
+        {/* List of added members */}
+        {tripData.members.length > 0 && (
+          <ul className="list-disc pl-5">
+            {tripData.members.map((member, index) => (
+              <li key={index} className="flex justify-between items-center mb-1">
+                <span>{member}</span>
+                <button
+                  onClick={() => handleRemoveMember(index)}
+                  className="text-red-500 hover:underline"
+                >
+                  Remove
+                </button>
+              </li>
+            ))}
+          </ul>
+        )}
+      </div>
 
       {/* Cost Summary */}
       <CostSummary
