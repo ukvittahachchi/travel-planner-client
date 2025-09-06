@@ -1,52 +1,80 @@
-import { useState, useContext } from "react";
+import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { UserContext } from "../context/UserContext";
-
-import ItineraryForm from "../components/ItineraryForm";
 import DestinationList from "../components/DestinationList";
 import FlightHotelForm from "../components/FlightHotelForm";
-import CostSummary from "../components/CostSummary"; // optional
+import CostSummary from "../components/CostSummary";
 
 const ItineraryBuilder = () => {
   const navigate = useNavigate();
-  const { trips, setTrips } = useContext(UserContext);
 
+  // Main trip state
   const [tripData, setTripData] = useState({
-    destination: "",
-    dates: "",
-    flights: [],
-    hotels: [],
-    expenses: [],
+    name: "",
+    destinations: [],
+    flights: {},
+    hotels: {},
+    dailyExpense: 100,
   });
 
   const handleSaveTrip = () => {
-    if (!tripData.destination || !tripData.dates) {
-      alert("Please fill in the destination and dates.");
-      return;
-    }
+    console.log("Saved Trip:", tripData);
 
-    const newTrip = {
-      id: trips.length + 1,
-      ...tripData,
-    };
+    // Save in localStorage for now
+    const existingTrips = JSON.parse(localStorage.getItem("trips")) || [];
+    localStorage.setItem("trips", JSON.stringify([...existingTrips, tripData]));
 
-    setTrips([...trips, newTrip]);
     navigate("/dashboard");
   };
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
-      <h1 className="text-2xl font-bold mb-4">Build Your Trip</h1>
+    <div className="max-w-3xl mx-auto p-4">
+      <h2 className="text-2xl font-bold mb-4">Build Your Itinerary</h2>
 
-      <ItineraryForm tripData={tripData} setTripData={setTripData} />
-      <DestinationList tripData={tripData} setTripData={setTripData} />
-      <FlightHotelForm tripData={tripData} setTripData={setTripData} />
+      {/* Trip Name */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Trip Name</label>
+        <input
+          type="text"
+          placeholder="Enter trip name"
+          value={tripData.name}
+          onChange={(e) => setTripData({ ...tripData, name: e.target.value })}
+          className="border p-2 w-full rounded"
+        />
+      </div>
 
-      <CostSummary tripData={tripData} /> {/* Optional */}
+      {/* Destinations */}
+      <DestinationList
+        destinations={tripData.destinations || []}
+        setDestinations={(newDestinations) =>
+          setTripData({ ...tripData, destinations: newDestinations })
+        }
+      />
 
+      {/* Flights & Hotels */}
+      <FlightHotelForm
+        destinations={tripData.destinations || []}
+        flights={tripData.flights || {}}
+        hotels={tripData.hotels || {}}
+        setFlights={(newFlights) =>
+          setTripData({ ...tripData, flights: newFlights })
+        }
+        setHotels={(newHotels) =>
+          setTripData({ ...tripData, hotels: newHotels })
+        }
+      />
+
+      {/* Cost Summary */}
+      <CostSummary
+        destinations={tripData.destinations || []}
+        flights={tripData.flights || {}}
+        hotels={tripData.hotels || {}}
+        dailyExpense={tripData.dailyExpense}
+      />
+
+      {/* Save Trip Button */}
       <button
         onClick={handleSaveTrip}
-        className="mt-6 px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600"
+        className="mt-4 bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600"
       >
         Save Trip
       </button>

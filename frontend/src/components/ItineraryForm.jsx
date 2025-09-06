@@ -1,22 +1,26 @@
 const ItineraryForm = ({ tripData, setTripData }) => {
+  const handleChange = (e) => {
+    setTripData({ ...tripData, [e.target.name]: e.target.value });
+  };
+
   return (
-    <div className="mb-4 p-4 border rounded-lg">
-      <h2 className="text-lg font-semibold mb-2">Trip Details</h2>
+    <div className="mb-4">
+      <label className="block text-sm font-medium">Destination</label>
       <input
         type="text"
-        placeholder="Destination"
-        className="block w-full p-2 mb-2 border rounded"
+        name="destination"
         value={tripData.destination}
-        onChange={(e) =>
-          setTripData({ ...tripData, destination: e.target.value })
-        }
+        onChange={handleChange}
+        className="w-full p-2 border rounded"
       />
+
+      <label className="block text-sm font-medium mt-2">Dates</label>
       <input
         type="text"
-        placeholder="Dates (e.g., 12-18 Sep 2025)"
-        className="block w-full p-2 mb-2 border rounded"
+        name="dates"
         value={tripData.dates}
-        onChange={(e) => setTripData({ ...tripData, dates: e.target.value })}
+        onChange={handleChange}
+        className="w-full p-2 border rounded"
       />
     </div>
   );

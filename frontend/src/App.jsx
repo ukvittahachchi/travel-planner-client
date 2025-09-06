@@ -25,7 +25,7 @@ function App() {
                     <ItineraryBuilder />
                   </ProtectedRoute>
                 } />
-        <Route path="/cost-estimator" element={
+        <Route path="/cost-estimator/:tripId" element={
                   <ProtectedRoute>
                     <CostEstimator />
                   </ProtectedRoute>
