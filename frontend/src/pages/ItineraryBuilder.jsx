@@ -13,18 +13,26 @@ const ItineraryBuilder = () => {
     destinations: [],
     flights: {},
     hotels: {},
-    dailyExpense: 100,
-    members: [], // ✅ NEW: Store group members
+    dailyExpense: 0,
+    members: [],
+    expenseSplits: {}, // ✅ Added expense splits
   });
 
   const [memberInput, setMemberInput] = useState("");
+  const [dailyExpenseInput, setDailyExpenseInput] = useState("");
 
   // ✅ Add a new group member
   const handleAddMember = () => {
     if (memberInput.trim() !== "") {
+      const newMember = memberInput.trim();
       setTripData({
         ...tripData,
-        members: [...tripData.members, memberInput.trim()],
+        members: [...tripData.members, newMember],
+        // Initialize expense split for new member
+        expenseSplits: {
+          ...tripData.expenseSplits,
+          [newMember]: 0
+        }
       });
       setMemberInput("");
     }
@@ -32,9 +40,30 @@ const ItineraryBuilder = () => {
 
   // ✅ Remove a member
   const handleRemoveMember = (index) => {
+    const memberToRemove = tripData.members[index];
     const updatedMembers = [...tripData.members];
     updatedMembers.splice(index, 1);
-    setTripData({ ...tripData, members: updatedMembers });
+    
+    // Remove from expense splits too
+    const updatedSplits = { ...tripData.expenseSplits };
+    delete updatedSplits[memberToRemove];
+    
+    setTripData({ 
+      ...tripData, 
+      members: updatedMembers,
+      expenseSplits: updatedSplits
+    });
+  };
+
+  // ✅ Update daily expense
+  const handleDailyExpenseChange = (e) => {
+    const value = e.target.value;
+    setDailyExpenseInput(value);
+    
+    setTripData({
+      ...tripData,
+      dailyExpense: value === "" ? 0 : parseFloat(value) || 0
+    });
   };
 
   const handleSaveTrip = () => {
@@ -63,6 +92,22 @@ const ItineraryBuilder = () => {
         />
       </div>
 
+      {/* Daily Expense Input */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Daily Expense per Destination ($)</label>
+        <input
+          type="number"
+          placeholder="Enter daily expense estimate"
+          value={dailyExpenseInput}
+          onChange={handleDailyExpenseChange}
+          min="0"
+          className="border p-2 w-full rounded"
+        />
+        <p className="text-sm text-gray-500 mt-1">
+          Estimated daily spending for food, activities, etc.
+        </p>
+      </div>
+
       {/* Destinations */}
       <DestinationList
         destinations={tripData.destinations || []}
@@ -80,7 +125,7 @@ const ItineraryBuilder = () => {
         setHotels={(newHotels) => setTripData({ ...tripData, hotels: newHotels })}
       />
 
-      {/* ✅ Group Members Input */}
+      {/* Group Members Input */}
       <div className="mt-6 border p-4 rounded shadow">
         <h3 className="text-lg font-semibold mb-2">Group Members</h3>
         <div className="flex gap-2 mb-3">

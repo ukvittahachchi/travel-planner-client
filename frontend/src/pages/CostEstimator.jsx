@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState, useEffect } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import CostSummary from "../components/CostSummary";
 import ExpenseSplitter from "../components/ExpenseSplitter";
@@ -6,10 +6,13 @@ import ExpenseSplitter from "../components/ExpenseSplitter";
 const CostEstimator = () => {
   const { tripId } = useParams();
   const navigate = useNavigate();
+  const [trip, setTrip] = useState(null);
 
   // Get trips from localStorage
-  const trips = JSON.parse(localStorage.getItem("trips")) || [];
-  const trip = trips[tripId]; // find trip by index
+  useEffect(() => {
+    const trips = JSON.parse(localStorage.getItem("trips")) || [];
+    setTrip(trips[tripId]);
+  }, [tripId]);
 
   if (!trip) {
     return (
@@ -36,10 +39,21 @@ const CostEstimator = () => {
     0
   );
 
-  const totalDailyExpense =
-    (trip.destinations?.length || 0) * (parseFloat(trip.dailyExpense) || 100);
+  // Use 0 as default instead of 100 if dailyExpense is not available
+  const dailyExpenseValue = parseFloat(trip.dailyExpense) || 0;
+  const totalDailyExpense = (trip.destinations?.length || 0) * dailyExpenseValue;
 
   const totalCost = totalFlightCost + totalHotelCost + totalDailyExpense;
+
+  // Handle expense split updates
+  const handleSplitUpdate = (splits) => {
+    const updatedTrips = JSON.parse(localStorage.getItem("trips")) || [];
+    if (updatedTrips[tripId]) {
+      updatedTrips[tripId].expenseSplits = splits;
+      localStorage.setItem("trips", JSON.stringify(updatedTrips));
+      setTrip(updatedTrips[tripId]); // Update local state
+    }
+  };
 
   return (
     <div className="max-w-3xl mx-auto p-4">
@@ -50,13 +64,18 @@ const CostEstimator = () => {
         destinations={trip.destinations || []}
         flights={trip.flights || {}}
         hotels={trip.hotels || {}}
-        dailyExpense={trip.dailyExpense || 100}
+        dailyExpense={dailyExpenseValue}
       />
 
       {/* Expense Splitter if group trip */}
       {trip.members && trip.members.length > 0 && (
         <div className="mt-6">
-          <ExpenseSplitter totalCost={totalCost} members={trip.members} />
+          <ExpenseSplitter 
+            totalCost={totalCost} 
+            members={trip.members} 
+            onSplitUpdate={handleSplitUpdate}
+            initialSplits={trip.expenseSplits || {}}
+          />
         </div>
       )}
 

@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 
-const CostSummary = ({ destinations = [], flights = {}, hotels = {}, dailyExpense = 100 }) => {
+const CostSummary = ({ destinations = [], flights = {}, hotels = {}, dailyExpense = 0 }) => {
   const [totalCost, setTotalCost] = useState(0);
 
   useEffect(() => {
@@ -17,8 +17,8 @@ const CostSummary = ({ destinations = [], flights = {}, hotels = {}, dailyExpens
       return sum + cost;
     }, 0);
 
-    // ✅ Calculate daily expenses
-    const dailySum = (destinations?.length || 0) * (parseFloat(dailyExpense) || 100);
+    // ✅ Calculate daily expenses - use 0 as default instead of 100
+    const dailySum = (destinations?.length || 0) * (parseFloat(dailyExpense) || 0);
 
     // ✅ Update total cost
     setTotalCost(flightSum + hotelSum + dailySum);
@@ -49,7 +49,7 @@ const CostSummary = ({ destinations = [], flights = {}, hotels = {}, dailyExpens
         )}</span></p>
 
         <p>Daily Expenses: <span className="font-bold">{formatCurrency(
-          (destinations?.length || 0) * (parseFloat(dailyExpense) || 100)
+          (destinations?.length || 0) * (parseFloat(dailyExpense) || 0)
         )}</span></p>
 
         <hr className="my-2" />
